@@ -1,0 +1,22 @@
+# Location in Snyder where BAM files are located:
+
+/scratch/snyder/r/roles/White4/Bam/
+total 185523872
+-rw-r--r-- 1 roles student           0 May 26 08:46 bam.loc
+-rw-r--r-- 1 roles student 14516846854 May 14 15:26 W1_Aligned_BT2.bam
+-rw-r--r-- 1 roles student  9261349112 May 14 16:15 W1_BT2_Aligned.sorted.bam
+-rw-r--r-- 1 roles student     3207216 May 15 14:15 W1_BT2_Aligned.sorted.bam.bai
+-rw-r--r-- 1 roles student 33015531361 May 15 05:50 W2_Aligned_BT2.bam
+-rw-r--r-- 1 roles student 19522891142 May 15 07:39 W2_BT2_Aligned.sorted.bam
+-rw-r--r-- 1 roles student     3265752 May 15 14:20 W2_BT2_Aligned.sorted.bam.bai
+-rw-r--r-- 1 roles student 28731209947 May 15 10:20 W3_Aligned_BT2.bam
+-rw-r--r-- 1 roles student 14228456887 May 15 11:52 W3_BT2_Aligned.sorted.bam
+-rw-r--r-- 1 roles student     4298216 May 15 11:56 W3_BT2_Aligned.sorted.bam.bai
+-rw-r--r-- 1 roles student 15279482399 May 15 13:16 W4D15_Aligned_BT2.bam
+-rw-r--r-- 1 roles student  8233360868 May 15 14:04 W4D15_BT2_Aligned.sorted.bam
+-rw-r--r-- 1 roles student     2205464 May 15 14:06 W4D15_BT2_Aligned.sorted.bam.bai
+-rw-r--r-- 1 roles student 29458638985 May 15 16:46 W4D7_Aligned_BT2.bam
+-rw-r--r-- 1 roles student 17712306007 May 15 18:25 W4D7_BT2_Aligned.sorted.bam
+-rw-r--r-- 1 roles student     3138584 May 15 18:29 W4D7_BT2_Aligned.sorted.bam.bai
+
+

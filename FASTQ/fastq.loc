@@ -1,0 +1,15 @@
+#Location of FASTQ files
+/scratch/snyder/r/roles/White4/FASTQ
+
+total 488447456
+-rw-r--r-- 1 roles student 33267539328 Oct  4  2019 043947_W43-D15_R1_filtered.fastq
+-rw-r--r-- 1 roles student 33266007822 Oct  4  2019 043947_W43-D15_R2_filtered.fastq
+-rw-r--r-- 1 roles student 30136669252 Oct  4  2019 043948_W12-D7_R1_filtered.fastq
+-rw-r--r-- 1 roles student 30139678842 Oct  4  2019 043948_W12-D7_R2_filtered.fastq
+-rw-r--r-- 1 roles student 68647766857 Oct  4  2019 043949_W22-D7_R1_filtered.fastq
+-rw-r--r-- 1 roles student 68645503211 Oct  4  2019 043949_W22-D7_R2_filtered.fastq
+-rw-r--r-- 1 roles student 58842030931 Oct  4  2019 043950_W32-D7_R1_filtered.fastq
+-rw-r--r-- 1 roles student 58832111679 Oct  4  2019 043950_W32-D7_R2_filtered.fastq
+-rw-r--r-- 1 roles student 59198651522 Oct  4  2019 043951_W42-D7_R1_filtered.fastq
+-rw-r--r-- 1 roles student 59194072030 Oct  4  2019 043951_W42-D7_R2_filtered.fastq
+-rw-r--r-- 1 roles student           0 May 26 08:47 fastq.loc

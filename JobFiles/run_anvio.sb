@@ -1,0 +1,89 @@
+#!/bin/bash
+
+#SBATCH -A standby
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=20
+#SBATCH --mem-per-cpu=10G
+#SBATCH --time=04:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=roles@purdue.edu
+
+# Step 0: Change directory and set up variables
+BASEDIR=/scratch/snyder/r/roles/White4
+CONTIGS=/scratch/snyder/r/roles/White4/W4.contigs.fasta
+CONTIG_DB=/scratch/snyder/r/roles/White4/W4.contigs.db
+PROJECT_NAME='W4 Anvio'
+BAM_PATH=/scratch/snyder/r/roles/White4/Bam
+TIGR=/scratch/snyder/r/roles/White4/ANVIO/TIGRFAMs_15.0_HMM.LIB
+PFAM=/scratch/snyder/r/roles/White4/ANVIO/Pfam-A.hmm
+
+# Step 1: Load required modules
+module load bioinfo
+module load anaconda/5.3.1-py37
+module load conda
+module load HMMER/3.2.1
+
+cd $BASEDIR/ANVIO
+
+# Step 2: Activate the previous creared  Anvio environment
+conda activate /home/roles/miniconda3/envs/anvio-6.2
+
+# Step 3: Go through all of the Anvi'o steps to make a database
+
+# a.) Generate contigs database
+#anvi-gen-contigs-database -f $CONTIGS -o $CONTIG_DB -n "$PROJECT_NAME"
+
+# b.) Run HMMs
+#anvi-run-hmms -c $CONTIG_DB --num-threads 20
+
+# c.) Run NCBI COGs
+#anvi-setup-ncbi-cogs --reset --num-threads 20 --just-do-it
+
+#anvi-run-ncbi-cogs -c $CONTIG_DB --num-threads 20
+
+# d.) Get sequence calls for genes
+#anvi-get-sequences-for-gene-calls -c $CONTIG_DB -o gene_calls.fa
+
+ #e.) Run centrifuge on gene calls and then import back into contig database
+#centrifuge -f -x $CENTRIFUGE_BASE/p+h+v gene_calls.fa -S centrifuge_hits.tsv
+#anvi-import-taxonomy-for-genes -c $CONTIG_DB -i centrifuge_report.tsv centrifuge_hits.tsv -p centrifuge
+
+
+# f.) Run anvi-profile for each of the BAM files:
+# Filtered:
+for B in $BAM_PATH/*sorted.bam
+do
+PROF_OUT=$(basename $B)_Filtered
+anvi-profile --num-threads 20 -i $B -c $CONTIG_DB --output-dir "${PROF_OUT%.*}"
+done
+
+# g.) Merge all anvio profiles
+anvi-merge W1_BT2_Aligned.sorted/PROFILE.db W2_BT2_Aligned.sorted/PROFILE.db W3_BT2_Aligned.sorted/PROFILE.db W4D7_BT2_Aligned.sorted/PROFILE.db W4D15_BT2_Aligned.sorted/PROFILE.db -o SAMPLES_MERGED -c $CONTIG_DB --sample-name 'White4'
+
+# h.) Grab the amino acid sequences from database to prepare for HMMER search
+anvi-get-sequences-for-gene-calls -c $CONTIG_DB -o export_genes_AA.fa --get-aa-sequences
+
+#hmmsearch --cpu 20 -o genes.TIGR --tblout genes.TIGR.tsv --cut_tc $TIGR export_genes_AA.fa
+
+# Repeat step h but for Pfams
+#hmmsearch --cpu 20 -o genes.Pfam --tblout genes.Pfam.tsv --cut_tc $PFAM export_genes_AA.fa
+
+
+# Now reformat results and import back into contigs.db
+#python /scratch/snyder/r/roles/White4/JobFiles/pfam_tigrfam_processing_anvio.py -t genes.TIGR.tsv -p genes.Pfam.tsv -d $RCAC_SCRATCH/White4/ANVIO/TIGRFAM -o tigr_pfam_results.txt
+
+
+anvi-import-functions -c $CONTIG_DB -i tigr_pfam_results.txt
+
+
+# Step 4: Import binsets for BT2 default.
+cd /scratch/snyder/r/roles/White4/RefineM/taxon_filtered
+python /scratch/snyder/r/roles/White4/JobFiles/anvio_contig_bin_creator.py /scratch/snyder/r/roles/White4/RefineM/taxon_filtered fasta $BASEDIR/ANVIO/MBAll_RmAllDef_Bins.txt
+cd $BASEDIR/ANVIO
+sed 's/^.//' MBAll_RmAllDef_Bins.txt > tmp.txt | mv tmp.txt MBAll_RmAllDef_Bins.txt
+
+#For this to work need to delete the header, it isn't accepting it for some reason
+anvi-import-collection MBAll_RmAllDef_Bins.txt -p $BASEDIR/ANVIO/SAMPLES_MERGED/PROFILE.db -c $CONTIG_DB --contigs-mode --collection-name "White4"
+
+# Step 5: Summarize results
+anvi-summarize -p $BASEDIR/ANVIO/SAMPLES_MERGED/PROFILE.db --report-aa-seqs-for-gene-calls -c $CONTIG_DB -o SUMMARY_AllBins_AllDef -C White4

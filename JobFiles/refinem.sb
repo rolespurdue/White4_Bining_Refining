@@ -1,0 +1,48 @@
+#!/bin/bash -l
+
+#SBATCH -A standby
+#SBATCH --nodes=1
+#SBATCH --time=02:00:00
+#SBATCH --ntasks=20
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=roles@purdue.edu
+
+
+# Step 1: Load required modules:
+module load bioinfo
+module load RefineM/0.0.25
+module load blast/2.9.0+
+module load HMMER/3.2.1
+
+#Step 2: Define variables
+DIR=/scratch/snyder/r/roles/White4/
+SCAFFOLD=W4.contigs.fasta
+BIN=Max_Bin
+BAM=Bam
+REF=/depot/lindems/data/Dane
+OUT=RefineM
+
+cd $DIR
+
+#Removes contamination based on genomic properties
+
+refinem scaffold_stats -c 20 -x fasta $SCAFFOLD $BIN $OUT/stats $BAM/*sorted.bam
+
+refinem outliers --no_plots $OUT/stats/scaffold_stats.tsv $OUT/outliers
+
+refinem filter_bins -x fasta $BIN $OUT/outliers/outliers.tsv $OUT/outliers/filtered
+
+#Removes contamination based on taxonomic assignments
+
+refinem call_genes -c 40 -x fasta $OUT/outliers/filtered/ $OUT/genes/
+
+refinem taxon_profile -c 40 -x fna $OUT/genes/ $OUT/stats/scaffold_stats.tsv $REF/gtdb_r89_protein_db.2019-09-27.faa.dmnd $REF/gtdb_r89_taxonomy.2019-09-27.tsv $OUT/taxon_profile/
+
+refinem taxon_filter -c 40 $OUT/taxon_profile/ $OUT/taxon_filter.tsv
+
+refinem filter_bins -x fasta $OUT/outliers/filtered/ $OUT/taxon_filter.tsv $OUT/taxon_filtered
+
+
+#Removes contigs with incongruent 16s rRNA genes
+
+refinem ssu_erroneous -x fasta $OUT/taxon_filtered $OUT/taxon_profile $REF/gtdb_r80_ssu_db.2018-01-18.fna $REF/gtdb_r89_taxonomy.2019-09-27.tsv $OUT/ssu_output/

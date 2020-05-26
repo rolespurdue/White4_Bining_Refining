@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# FILENAME: max_bin.sb
+#SBATCH -A lindems
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --time=4:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=roles@purdue.edu
+#SBATCH --job-name Max_Bin
+
+#Defines variables and runs MaxBin
+cd /scratch/snyder/r/roles/White4
+module load bioinfo
+module load MaxBin/2.2.3
+
+ASSEMBLY=W4.contigs.fasta
+OUT=Max_Bin
+ABUN=Abundances/abund_list.txt
+
+time run_MaxBin.pl -contig $ASSEMBLY -out $OUT -abund_list $ABUN

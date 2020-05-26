@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#SBATCH -A lindems
+#SBATCH --nodes=1
+#SBATCH --time=20:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=roles@purdue.edu
+
+# Step 0: Set up variables
+REF=/depot/lindems/data/Dane
+BASEDIR=/scratch/snyder/r/roles/White4/Phylogeny
+TIGR=/scratch/snyder/r/roles/White4/ANVIO/TIGRFAMs_15.0_HMM.LIB
+PFAM=/scratch/snyder/r/roles/White4/ANVIO/Pfam-A.hmm
+
+# Step 1: Load required modules
+module load bioinfo
+module load blast/2.10.0+
+module load mafft
+module load FastTree
+module load prodigal
+
+
+cd $BASEDIR
+
+#Step 2: Blast the SCGs against the blast database
+#use prodigal to convert the contig DNA file to protein
+#prodigal -i $REF/R4.scg.contigs.fasta -o gene.R4.gbk -a protein.translations.fasta
+blastn -query Red4-Blastn_uniq.fasta -db nt -out Red4-Blastp2.out -max_target_seqs 3 -outfmt "6 sacc staxids" -num_threads 20
+#sort -u Red4-Blastp.out > Red4-Blastp-uniq.out
+sort Red4-Blastn.txt | uniq -c | sort -n > Red4-Blastn_count.txt
+
+
+prodigal -i Red4-Blastn_uniq.fasta -o Red4-Blastn_uniq.prot.gbk -a Red4-Blastn_uniq.prot.fasta
+clustalo -i Red4-Blastn_uniq.prot.fasta -o Red4-BLastn_uniq.prot.clustalo.aln --outfmt=clu --force 
+
+#BLASTP is used to compare the proteins to UniProt
+#hmmsearch --cpu 20 -o genes.TIGR --tblout genes.TIGR.tsv --cut_tc $TIGR $REF/R4.scg.contigs.fasta
+#hmmsearch --cpu 20 -o genes.Pfam --tblout genes.Pfam.tsv --cut_tc $PFAM $REF/R4.scg.contigs.fasta
+#python /scratch/snyder/r/roles/White4/JobFiles/pfam_tigrfam_processing_anvio.py -t genes.TIGR.tsv -p genes.Pfam.tsv -d $RCAC_SCRATCH/White4/ANVIO/TIGRFAM -o tigr_pfam_results.txt
+
+#Predicted protein sequences for the input genomes are searched for the PFAM v31.0 [33] and TIGRFAM v14.0 [34] hmm profiles of these SCG proteins using HMMER v3.1b2 [35].
+#Protein sequences for each hmm profile are then individually aligned using HMMER and concatenated into a multiple sequence alignment (MSA). 
+#Columns represented by < 50% of genomes and/or with an amino acid consensus < 25% are removed, and a phylogenetic tree is built using FastTree
+
+
+#Reports of the DIAMOND results at the level of the MAG and for each contig within each MAG are produced. The proteins are also compared to protein families in Pfam 
+#(Finn et al., 2014) using PfamScan; and to create a tree using PhyloPhlAn (Segata et al., 2013), which is subsequently visualised using GraPhlAn (Asnicar et al., 2015). 
+#The MAG genome sequences are also compared to over 100 000 public genomes using MinHash signatures as implemented in Sourmash (Brown and Irber, 2016).
+
+
+#Step 3: Align the blast output
+#mafft --thread 10 --reorder --maxiterate 1000 --localpair Red4-Blastn_uniq.fasta > Red4.aln1
+
+#Step 4: Create a phylogenetic tree (figure out how to collapse genes into species) 
+#FastTree Red4.aln1 > Red4_ML_aln1.tree
+
+

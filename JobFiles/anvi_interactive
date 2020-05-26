@@ -1,0 +1,10 @@
+anvi-interactive -p ANVIO/SAMPLES_MERGED/PROFILE.db -c W4.contigs.db -C White4 --gene-mode -b Bin_001 --server-only -P 8080
+
+anvi-refine -p ANVIO/SAMPLES_MERGED/PROFILE.db -c W4.contigs.db -C White4 -b Bin_002 --server-only -P 8080
+
+#compiles num contigs into an overall file 
+find /scratch/snyder/r/roles/White4/ANVIO/SUMMARY_AllBins_AllDef/bin_by_bin/ -type f -name '*-num_contigs.txt' -print | while read filename; do
+    echo "$filename"
+    cat "$filename"
+done > num_contigs.txt
+
